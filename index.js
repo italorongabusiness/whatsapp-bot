@@ -1,50 +1,53 @@
 import express from "express";
 
 const app = express();
+app.use(express.json());
 
-// prende il RAW body (serve per debug e per firme in futuro)
-app.use(
-  express.json({
-    verify: (req, res, buf) => {
-      req.rawBody = buf?.toString("utf8") || "";
-    },
-  })
-);
+const PORT = process.env.PORT || 10000;
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "testtoken";
 
-// logga QUALSIASI richiesta in ingresso (questa è la tua “scatola nera”)
-app.use((req, res, next) => {
-  console.log("---- INCOMING ----");
-  console.log(new Date().toISOString());
-  console.log(req.method, req.originalUrl);
-  console.log("headers:", JSON.stringify(req.headers));
-  if (req.rawBody) console.log("rawBody:", req.rawBody);
-  next();
+/* =========================
+   HEALTH CHECK (RENDER)
+========================= */
+app.get("/", (req, res) => {
+  res.status(200).send("OK");
 });
 
-// health check
-app.get("/", (req, res) => res.status(200).send("OK"));
+app.head("/", (req, res) => {
+  res.sendStatus(200);
+});
 
-// webhook verify (Meta)
+/* =========================
+   WEBHOOK VERIFICA (META)
+========================= */
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "verify123";
+  console.log("WEBHOOK VERIFY:", mode, token);
 
   if (mode === "subscribe" && token === VERIFY_TOKEN) {
     console.log("WEBHOOK VERIFIED");
     return res.status(200).send(challenge);
   }
-  console.log("WEBHOOK VERIFY FAILED", { mode, token });
+
   return res.sendStatus(403);
 });
 
-// webhook events (Meta)
+/* =========================
+   WEBHOOK EVENTI WHATSAPP
+========================= */
 app.post("/webhook", (req, res) => {
-  console.log("WEBHOOK EVENT BODY:", JSON.stringify(req.body));
-  return res.sendStatus(200);
+  console.log("---- INCOMING WEBHOOK ----");
+  console.dir(req.body, { depth: null });
+
+  res.sendStatus(200);
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+/* =========================
+   START SERVER
+========================= */
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
