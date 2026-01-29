@@ -103,7 +103,7 @@ async function appendLeadRow(rowValues) {
 
   // Scrive su Foglio1 dalla riga 2 in poi (header è già su riga 1)
   // Se il tuo foglio si chiama diverso, cambia "Foglio1" qui sotto.
-  const range = "Foglio1!A:L";
+  const range = "'Leads'!A:L";
 
   try {
     await sheets.spreadsheets.values.append({
