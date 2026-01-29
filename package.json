@@ -1,11 +1,14 @@
 {
   "name": "whatsapp-bot",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/index.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "axios": "^1.7.9",
+    "express": "^4.19.2",
+    "googleapis": "^140.0.1"
   }
 }
